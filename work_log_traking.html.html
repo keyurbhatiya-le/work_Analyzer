@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Work & Break Time Analyzer</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(160deg, #eef2ff 0%, #f4f7f6 45%);
+            color: #333;
+            margin: 0;
+            padding: 32px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px -20px rgba(76, 29, 149, 0.18), 0 4px 15px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+        .hero {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: #fff;
+            padding: 32px 34px 28px;
+        }
+        .hero h2 {
+            margin: 0 0 6px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .hero p {
+            margin: 0;
+            color: rgba(255,255,255,0.82);
+            font-size: 14px;
+            max-width: 640px;
+        }
+        .body-pad { padding: 30px 34px 34px; }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 12px;
+            resize: vertical;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+            background: #fff;
+        }
+        .controls {
+            margin-top: 16px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        button {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 12px 26px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 8px 18px -6px rgba(124, 58, 237, 0.5);
+        }
+        .system-time {
+            font-size: 13px;
+            font-weight: 700;
+            color: #4f46e5;
+            background: #eef2ff;
+            padding: 9px 14px;
+            border-radius: 10px;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 18px;
+            margin-top: 30px;
+        }
+        .card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 14px;
+            border: 1px solid #eef0f4;
+        }
+        .card-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        .card.office .card-icon { background: #e0e7ff; }
+        .card.break .card-icon   { background: #ffedd5; }
+        .card.work .card-icon    { background: #dcfce7; }
+        .card.status .card-icon  { background: #f3e8ff; }
+        .card.finish .card-icon  { background: #cffafe; }
+        .card h3 {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+        .card .value {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+        .status-complete { background-color: #d4edda; color: #155724; }
+        .status-pending   { background-color: #fff3cd; color: #856404; }
+        .status-live      { background-color: #e0e7ff; color: #4338ca; }
+        .goal-progress-wrap {
+            margin-top: 26px;
+            background: #f8fafc;
+            border: 1px solid #eef0f4;
+            border-radius: 14px;
+            padding: 18px 20px;
+        }
+        .goal-progress-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+        .progress-track {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            transition: width 0.5s ease;
+        }
+        .progress-fill.complete { background: linear-gradient(90deg, #22c55e, #16a34a); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="hero">
+        <h2>Swipe Log Time Analyzer <span style="font-weight:500; opacity:0.85;">— Total Hours Calc</span></h2>
+        <p>Paste your row logs. Work hours are computed strictly between valid 'In' and 'Out' states.</p>
+    </div>
+
+    <div class="body-pad">
+        <textarea id="logInput" placeholder="Paste logs here..."></textarea>
+
+        <div class="controls">
+            <button onclick="analyzeLogs()">Analyze Logs</button>
+            <div id="liveClock" class="system-time">System Time: --:--</div>
+        </div>
+
+        <div class="dashboard">
+            <div class="card office">
+                <div class="card-icon">🏢</div>
+                <h3>Total Office Time</h3>
+                <div id="totalOffice" class="value">0h 0m</div>
+                <small style="color:#94a3b8;">First In to Last Out</small>
+            </div>
+            <div class="card break">
+                <div class="card-icon">☕</div>
+                <h3>Total Break Time</h3>
+                <div id="totalPantry" class="value">0h 0m</div>
+            </div>
+            <div class="card work">
+                <div class="card-icon">💼</div>
+                <h3>Net Working Time</h3>
+                <div id="netWork" class="value">0h 0m</div>
+            </div>
+            <div class="card status">
+                <div class="card-icon">🎯</div>
+                <h3>8-Hour Goal Status</h3>
+                <div id="goalStatus" class="value">-</div>
+                <div id="statusBadgeContainer"></div>
+            </div>
+            <div class="card finish">
+                <div class="card-icon">🏁</div>
+                <h3>8-Hour Completion Time</h3>
+                <div id="completionTime" class="value">--:--</div>
+                <small id="completionContext" style="color:#94a3b8;">Calculation based on logs</small>
+            </div>
+        </div>
+
+        <div class="goal-progress-wrap">
+            <div class="goal-progress-head">
+                <span>Progress toward 8h goal</span>
+                <span id="goalProgressPct">0%</span>
+            </div>
+            <div class="progress-track">
+                <div id="goalProgressFill" class="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateClock() {
+    const now = new Date();
+    document.getElementById('liveClock').innerText = `System Time: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+function parseTimeToMinutes(timeStr) {
+    const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return null;
+    let hours = parseInt(match[1]);
+    const minutes = parseInt(match[2]);
+    const ampm = match[3].toUpperCase();
+
+    if (ampm === 'PM' && hours < 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
+
+    return hours * 60 + minutes;
+}
+
+function formatMinutesToHoursAndMins(totalMinutes) {
+    if(totalMinutes < 0) totalMinutes = 0;
+    const hrs = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    return `${hrs}h ${mins}m`;
+}
+
+function formatDate(date) {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${String(date.getDate()).padStart(2, '0')}-${months[date.getMonth()]}-${String(date.getFullYear()).slice(-2)}`;
+}
+
+function formatClockTime(totalMinutesSinceMidnight) {
+    const mins = ((totalMinutesSinceMidnight % 1440) + 1440) % 1440;
+    const hrs24 = Math.floor(mins / 60);
+    const mm = mins % 60;
+    const ampm = hrs24 >= 12 ? 'PM' : 'AM';
+    let hrs12 = hrs24 % 12;
+    if (hrs12 === 0) hrs12 = 12;
+    return `${hrs12}:${String(mm).padStart(2, '0')} ${ampm}`;
+}
+
+let lastParsedLogs = null;
+let lastLogDateStr = "";
+let liveRemainingSeconds = null;
+let countdownActive = false;
+
+function analyzeLogs() {
+    const rawData = document.getElementById('logInput').value.trim();
+    if (!rawData) {
+        alert("Please paste some log data first.");
+        return;
+    }
+
+    const lines = rawData.split('\n');
+    let logs = [];
+    let logDateStr = "";
+
+    // Robust Regex matching spacing patterns across all device names
+    const logRegex = /^(\d{2}-[A-Za-z]{3}-\d{2})\s*(\d{2}:\d{2}\s*(?:AM|PM))\s*(In|Out)/i;
+
+    lines.forEach(line => {
+        const cleanedLine = line.trim();
+        if (!cleanedLine || cleanedLine.toLowerCase().includes('dateentry')) return;
+
+        const match = cleanedLine.match(logRegex);
+        if (match) {
+            logDateStr = match[1];
+            const timeStr = match[2];
+            const inOut = match[3].toLowerCase();
+            const minutes = parseTimeToMinutes(timeStr);
+            if (minutes !== null) {
+                logs.push({ minutes, inOut });
+            }
+        }
+    });
+
+    if (logs.length === 0) {
+        alert("No valid log data detected.");
+        return;
+    }
+
+    logs.sort((a, b) => a.minutes - b.minutes);
+    lastParsedLogs = logs;
+    lastLogDateStr = logDateStr;
+    renderStats();
+}
+
+setInterval(() => {
+    if (lastParsedLogs) renderStats();
+}, 15000);
+
+function renderStats() {
+    const logs = lastParsedLogs;
+    const logDateStr = lastLogDateStr;
+    if (!logs) return;
+
+    const todayStr = formatDate(new Date());
+    const isToday = (logDateStr.toLowerCase() === todayStr.toLowerCase());
+
+    const firstIn = logs[0].minutes;
+    let lastOut = logs[logs.length - 1].minutes;
+
+    let isLiveTracking = false;
+    if (isToday) {
+        const now = new Date();
+        const currentSystemMinutes = (now.getHours() * 60) + now.getMinutes();
+        if (currentSystemMinutes > lastOut) {
+            // Check if user is currently swiped IN
+            if (logs[logs.length - 1].inOut === 'in') {
+                lastOut = currentSystemMinutes;
+                isLiveTracking = true;
+            }
+        }
+    }
+
+    const totalOfficeMinutes = lastOut - firstIn;
+
+    // Strict calculation: sum periods where user is swiped Out between work blocks
+    let netWorkingMinutes = 0;
+    let currentInTime = null;
+
+    logs.forEach(log => {
+        if (log.inOut === 'in') {
+            if (currentInTime === null) currentInTime = log.minutes;
+        } else if (log.inOut === 'out') {
+            if (currentInTime !== null) {
+                netWorkingMinutes += (log.minutes - currentInTime);
+                currentInTime = null;
+            }
+        }
+    });
+
+    // Handle ongoing live calculation if last punch was an IN punch
+    if (currentInTime !== null && isToday) {
+        const now = new Date();
+        const currentSystemMinutes = (now.getHours() * 60) + now.getMinutes();
+        if (currentSystemMinutes > currentInTime) {
+            netWorkingMinutes += (currentSystemMinutes - currentInTime);
+        }
+    }
+
+    // Break time is total time spent away between shifts
+    const breakMinutes = totalOfficeMinutes - netWorkingMinutes;
+    const goalMinutes = 8 * 60;
+    const remainingMinutes = goalMinutes - netWorkingMinutes;
+
+    document.getElementById('totalOffice').innerText = formatMinutesToHoursAndMins(totalOfficeMinutes);
+    document.getElementById('totalPantry').innerText = formatMinutesToHoursAndMins(breakMinutes);
+    document.getElementById('netWork').innerText = formatMinutesToHoursAndMins(netWorkingMinutes);
+
+    const goalStatusDiv = document.getElementById('goalStatus');
+    const badgeContainer = document.getElementById('statusBadgeContainer');
+
+    if (remainingMinutes <= 0) {
+        countdownActive = false;
+        goalStatusDiv.innerText = "Completed!";
+        badgeContainer.innerHTML = `<span class="status-badge status-complete">8 Hours Achieved! 🎉</span>`;
+    } else if (isLiveTracking) {
+        countdownActive = true;
+        liveRemainingSeconds = remainingMinutes * 60;
+        badgeContainer.innerHTML = `<span class="status-badge status-live">Counting down...</span>`;
+        updateCountdown(false);
+    } else {
+        countdownActive = false;
+        goalStatusDiv.innerText = `${formatMinutesToHoursAndMins(remainingMinutes)} left`;
+        badgeContainer.innerHTML = `<span class="status-badge status-pending">Pending</span>`;
+    }
+
+    const progressPct = Math.max(0, Math.min(100, Math.round((netWorkingMinutes / goalMinutes) * 100)));
+    const progressFill = document.getElementById('goalProgressFill');
+    progressFill.style.width = `${progressPct}%`;
+    progressFill.classList.toggle('complete', progressPct >= 100);
+    document.getElementById('goalProgressPct').innerText = `${progressPct}%`;
+
+    const completionClockMinutes = firstIn + goalMinutes + breakMinutes;
+    const completionTimeEl = document.getElementById('completionTime');
+    const completionContextEl = document.getElementById('completionContext');
+
+    completionTimeEl.innerText = formatClockTime(completionClockMinutes);
+
+    if (remainingMinutes <= 0) {
+        completionContextEl.innerText = "Goal reached at this time";
+    } else if (isLiveTracking) {
+        completionContextEl.innerText = "Estimate — updates live, assumes no more breaks";
+    } else {
+        completionContextEl.innerText = "Based on pasted log (not live)";
+    }
+}
+
+function updateCountdown(tick = true) {
+    if (!countdownActive || liveRemainingSeconds === null) return;
+
+    if (tick) liveRemainingSeconds -= 1;
+
+    if (liveRemainingSeconds <= 0) {
+        liveRemainingSeconds = 0;
+        countdownActive = false;
+        document.getElementById('goalStatus').innerText = "Completed!";
+        document.getElementById('statusBadgeContainer').innerHTML = `<span class="status-badge status-complete">8 Hours Achieved! 🎉</span>`;
+        return;
+    }
+
+    const hh = Math.floor(liveRemainingSeconds / 3600);
+    const mm = Math.floor((liveRemainingSeconds % 3600) / 60);
+    const ss = liveRemainingSeconds % 60;
+    document.getElementById('goalStatus').innerText =
+        `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+}
+setInterval(updateCountdown, 1000);
+</script>
+</body>
+</html>
