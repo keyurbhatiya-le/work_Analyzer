@@ -2,439 +2,1976 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Work & Break Time Analyzer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Work Tracker">
+    <meta name="application-name" content="Work Tracker">
+    <meta name="description" content="Attendance and shift analyzer for Half Day (4h), Short Leave (6h), and Full Day (8h) tracking with real-time countdown.">
+    <title>Work Tracker — Shift & Attendance Analyzer</title>
+
+    <!-- Professional SVG Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%234f46e5'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='white' stroke-width='2'/%3E%3Cpolyline points='16,11 16,16 19,19' fill='none' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    <!-- Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        * { box-sizing: border-box; }
+        :root {
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            /* Dark Palette (Default) */
+            --bg-body: #0c0e14;
+            --bg-surface: #141721;
+            --bg-surface-elevated: #1a1e2b;
+            --bg-input: #0e1017;
+            --bg-subtle: rgba(255, 255, 255, 0.03);
+
+            --border-default: #232736;
+            --border-muted: #1c202d;
+            --border-focus: #6366f1;
+
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: rgba(99, 102, 241, 0.12);
+
+            --success: #10b981;
+            --success-light: rgba(16, 185, 129, 0.12);
+            --success-border: rgba(16, 185, 129, 0.25);
+
+            --warning: #f59e0b;
+            --warning-light: rgba(245, 158, 11, 0.12);
+            --warning-border: rgba(245, 158, 11, 0.25);
+
+            --info: #0284c7;
+            --info-light: rgba(2, 132, 199, 0.12);
+            --info-border: rgba(2, 132, 199, 0.25);
+
+            --danger: #ef4444;
+
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+
+            --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-theme {
+            --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-surface-elevated: #f1f5f9;
+            --bg-input: #f8fafc;
+            --bg-subtle: #f1f5f9;
+
+            --border-default: #e2e8f0;
+            --border-muted: #edf2f7;
+            --border-focus: #4f46e5;
+
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+
+            --primary-light: rgba(79, 70, 229, 0.08);
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(160deg, #eef2ff 0%, #f4f7f6 45%);
-            color: #333;
-            margin: 0;
-            padding: 32px 20px;
+            font-family: var(--font-sans);
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px 20px 60px;
+            line-height: 1.5;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
-        .container {
-            max-width: 900px;
+
+        .app-container {
+            max-width: 1040px;
             margin: 0 auto;
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px -20px rgba(76, 29, 149, 0.18), 0 4px 15px rgba(0,0,0,0.04);
-            overflow: hidden;
         }
-        .hero {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            color: #fff;
-            padding: 32px 34px 28px;
-        }
-        .hero h2 {
-            margin: 0 0 6px;
-            font-size: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-        }
-        .hero p {
-            margin: 0;
-            color: rgba(255,255,255,0.82);
-            font-size: 14px;
-            max-width: 640px;
-        }
-        .body-pad { padding: 30px 34px 34px; }
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 14px;
-            border: 1px solid #e2e8f0;
-            background: #f8fafc;
-            border-radius: 12px;
-            resize: vertical;
-            font-family: 'Consolas', monospace;
-            font-size: 13px;
-        }
-        textarea:focus {
-            outline: none;
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
-            background: #fff;
-        }
-        .controls {
-            margin-top: 16px;
+
+        /* Top Navigation Header */
+        header.app-header {
             display: flex;
-            gap: 15px;
             align-items: center;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-card);
         }
-        button {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: white;
-            border: none;
-            padding: 12px 26px;
-            font-size: 15px;
-            font-weight: 700;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 8px 18px -6px rgba(124, 58, 237, 0.5);
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .system-time {
-            font-size: 13px;
-            font-weight: 700;
-            color: #4f46e5;
-            background: #eef2ff;
-            padding: 9px 14px;
-            border-radius: 10px;
-        }
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-            gap: 18px;
-            margin-top: 30px;
-        }
-        .card {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 14px;
-            border: 1px solid #eef0f4;
-        }
-        .card-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
+
+        .brand-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: var(--radius-sm);
+            background: var(--primary);
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .brand-text h1 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+        }
+
+        .brand-text p {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .clock-badge {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--success);
+        }
+
+        .status-dot.pulsing {
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+        }
+
+        .theme-toggle-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-default);
+            background: var(--bg-subtle);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--border-focus);
+        }
+
+        /* Live Indicator Banner */
+        .live-status-bar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 18px;
+            background: var(--success-light);
+            border: 1px solid var(--success-border);
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        .live-status-bar.active {
+            display: flex;
+        }
+
+        .live-status-bar.break-mode {
+            background: var(--warning-light);
+            border-color: var(--warning-border);
+        }
+
+        .live-status-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .live-status-bar.break-mode .live-status-left {
+            color: var(--warning);
+        }
+
+        .live-status-time {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--success);
+            font-size: 13px;
+        }
+
+        .live-status-bar.break-mode .live-status-time {
+            color: var(--warning);
+        }
+
+        /* Workspace Card */
+        .workspace {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 24px;
+        }
+
+        .workspace-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .workspace-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .workspace-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Textarea */
+        textarea.log-textarea {
+            width: 100%;
+            height: 140px;
+            padding: 14px 16px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.15s ease;
+        }
+
+        textarea.log-textarea:focus {
+            outline: none;
+            border-color: var(--border-focus);
+        }
+
+        textarea.log-textarea::placeholder {
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        /* Action Toolbar */
+        .action-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .btn-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid transparent;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border-color: var(--border-default);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-subtle);
+            color: var(--text-primary);
+            border-color: var(--border-focus);
+        }
+
+        .btn-subtle {
+            background: transparent;
+            color: var(--text-muted);
+        }
+
+        .btn-subtle:hover {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        /* 3 Shift Targets (8h, 6h, 4h) Comparison Panel */
+        .targets-section {
+            margin-top: 24px;
+        }
+
+        .targets-title-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 12px;
         }
-        .card.office .card-icon { background: #e0e7ff; }
-        .card.break .card-icon   { background: #ffedd5; }
-        .card.work .card-icon    { background: #dcfce7; }
-        .card.status .card-icon  { background: #f3e8ff; }
-        .card.finish .card-icon  { background: #cffafe; }
-        .card h3 {
-            margin: 0 0 8px 0;
+
+        .targets-title {
             font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
-            color: #94a3b8;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
         }
-        .card .value {
-            font-size: 26px;
-            font-weight: 800;
-            color: #1e293b;
+
+        .targets-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
         }
-        .status-badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 999px;
-            font-size: 12px;
+
+        .target-card {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .target-card:hover {
+            border-color: var(--border-focus);
+        }
+
+        .target-card.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .target-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .target-card-label {
+            font-size: 11px;
             font-weight: 700;
-            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
         }
-        .status-complete { background-color: #d4edda; color: #155724; }
-        .status-pending   { background-color: #fff3cd; color: #856404; }
-        .status-live      { background-color: #e0e7ff; color: #4338ca; }
-        .goal-progress-wrap {
-            margin-top: 26px;
-            background: #f8fafc;
-            border: 1px solid #eef0f4;
-            border-radius: 14px;
-            padding: 18px 20px;
+
+        .target-card-hours {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-default);
+            color: var(--text-secondary);
         }
-        .goal-progress-head {
+
+        .target-card.selected .target-card-hours {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .target-countdown-subhead {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-top: 4px;
+            margin-bottom: 3px;
+        }
+
+        .target-countdown-val {
+            font-family: var(--font-mono);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin-bottom: 6px;
+        }
+
+        .target-countdown-val.completed {
+            color: var(--success);
+        }
+
+        .target-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .target-progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--border-default);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .target-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .target-progress-fill.done {
+            background: var(--success);
+        }
+
+        /* Summary Stats Cards Grid (4 columns) */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .metric-box {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+        }
+
+        .metric-box.active-countdown {
+            border-color: var(--border-focus);
+            background: var(--primary-light);
+        }
+
+        .metric-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .metric-data {
+            font-family: var(--font-mono);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .metric-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* Shift Timeline Visualizer */
+        .timeline-container {
+            margin-top: 24px;
+            padding: 18px;
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+        }
+
+        .timeline-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .timeline-header h3 {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .timeline-legend {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .legend-tag {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+        }
+
+        .indicator-work { background: var(--success); }
+        .indicator-break { background: var(--warning); }
+        .indicator-live { background: var(--primary); }
+
+        .timeline-track {
+            width: 100%;
+            height: 24px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-default);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            position: relative;
+        }
+
+        .timeline-block {
+            height: 100%;
+            position: relative;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+
+        .timeline-block:hover {
+            opacity: 0.85;
+        }
+
+        .timeline-block.work {
+            background: var(--success);
+        }
+
+        .timeline-block.break {
+            background: var(--warning);
+        }
+
+        .timeline-block.live {
+            background: var(--primary);
+            background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 0, rgba(255, 255, 255, 0.15) 8px, transparent 8px, transparent 16px);
+        }
+
+        .timeline-timestamps {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Log Table */
+        .log-table-container {
+            margin-top: 24px;
+        }
+
+        .log-table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .log-table-header h3 {
             font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
-            color: #94a3b8;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .log-table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            background: var(--bg-surface-elevated);
+        }
+
+        table.attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        table.attendance-table th {
+            padding: 10px 14px;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            background: var(--bg-subtle);
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        table.attendance-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-default);
+            color: var(--text-secondary);
+        }
+
+        table.attendance-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        table.attendance-table tr:hover td {
+            background: var(--bg-subtle);
+            color: var(--text-primary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+        }
+
+        .badge-in {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid var(--success-border);
+        }
+
+        .badge-out {
+            background: var(--warning-light);
+            color: var(--warning);
+            border: 1px solid var(--warning-border);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 18px;
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border-focus);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(12px);
+            pointer-events: none;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .toast.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Missed Punch Modal & Anomalies */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-dialog {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            max-width: 520px;
+            width: 100%;
+            overflow: hidden;
+            animation: modal-appear 0.15s ease-out;
+        }
+
+        @keyframes modal-appear {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-default);
+            background: var(--bg-subtle);
+        }
+
+        .modal-header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-badge-warn {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid var(--warning-border);
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: color 0.15s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-subtle);
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 12px 20px;
+            border-top: 1px solid var(--border-default);
+            background: var(--bg-subtle);
+        }
+
+        .anomaly-item {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-default);
+            border-left: 3px solid var(--warning);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
             margin-bottom: 10px;
         }
-        .progress-track {
-            width: 100%;
-            height: 12px;
-            background: #e2e8f0;
-            border-radius: 999px;
-            overflow: hidden;
+
+        .anomaly-item:last-child {
+            margin-bottom: 0;
         }
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #4f46e5, #7c3aed);
-            transition: width 0.5s ease;
+
+        .anomaly-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
         }
-        .progress-fill.complete { background: linear-gradient(90deg, #22c55e, #16a34a); }
+
+        .anomaly-type {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--warning);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .anomaly-time {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .anomaly-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .anomaly-location {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* Missed Punch Toolbar Badge */
+        .btn-warn-badge {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--warning);
+            border: 1px solid var(--warning-border);
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 7px 12px;
+            border-radius: var(--radius-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-warn-badge:hover {
+            background: rgba(245, 158, 11, 0.22);
+            border-color: var(--warning);
+        }
+
+        .badge-anomaly {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid var(--warning-border);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            text-transform: uppercase;
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 860px) {
+            .targets-grid {
+                grid-template-columns: 1fr;
+            }
+            .metrics-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body { padding: 12px 10px 40px; }
+            .workspace { padding: 16px; }
+            .metrics-grid { grid-template-columns: 1fr; }
+            .header-controls .clock-badge { display: none; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="hero">
-        <h2>Swipe Log Time Analyzer <span style="font-weight:500; opacity:0.85;">— Total Hours Calc</span></h2>
-        <p>Paste your row logs. Work hours are computed strictly between valid 'In' and 'Out' states.</p>
+<div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-brand">
+            <div class="brand-logo" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <h1>Work Tracker</h1>
+                <p>Attendance, Break & Shift Time Analyzer</p>
+            </div>
+        </div>
+
+        <div class="header-controls">
+            <div id="liveClockBadge" class="clock-badge" title="Device Clock">
+                <span class="status-dot pulsing"></span>
+                <span id="systemClockVal">--:--:--</span>
+            </div>
+            <button id="themeToggle" class="theme-toggle-btn" onclick="toggleTheme()" title="Switch Light/Dark Mode" aria-label="Toggle Theme">
+                <svg id="themeIconSun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Live Shift Status (Active when employee is currently Swiped IN or on Live Break) -->
+    <div id="liveStatusBar" class="live-status-bar">
+        <div class="live-status-left">
+            <span class="status-dot pulsing"></span>
+            <span id="liveStatusText">Live Shift Active &mdash; Currently Swiped IN</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px;">
+            <div id="liveSessionDuration" class="live-status-time">Session: --:--:--</div>
+            <div id="liveTargetCountdown" class="live-status-time" style="color:var(--text-primary); font-weight:700;">Remaining: --:--:--</div>
+        </div>
     </div>
 
-    <div class="body-pad">
-        <textarea id="logInput" placeholder="Paste logs here..."></textarea>
-
-        <div class="controls">
-            <button onclick="analyzeLogs()">Analyze Logs</button>
-            <div id="liveClock" class="system-time">System Time: --:--</div>
-        </div>
-
-        <div class="dashboard">
-            <div class="card office">
-                <div class="card-icon">🏢</div>
-                <h3>Total Office Time</h3>
-                <div id="totalOffice" class="value">0h 0m</div>
-                <small style="color:#94a3b8;">First In to Last Out</small>
-            </div>
-            <div class="card break">
-                <div class="card-icon">☕</div>
-                <h3>Total Break Time</h3>
-                <div id="totalPantry" class="value">0h 0m</div>
-            </div>
-            <div class="card work">
-                <div class="card-icon">💼</div>
-                <h3>Net Working Time</h3>
-                <div id="netWork" class="value">0h 0m</div>
-            </div>
-            <div class="card status">
-                <div class="card-icon">🎯</div>
-                <h3>8-Hour Goal Status</h3>
-                <div id="goalStatus" class="value">-</div>
-                <div id="statusBadgeContainer"></div>
-            </div>
-            <div class="card finish">
-                <div class="card-icon">🏁</div>
-                <h3>8-Hour Completion Time</h3>
-                <div id="completionTime" class="value">--:--</div>
-                <small id="completionContext" style="color:#94a3b8;">Calculation based on logs</small>
+    <!-- Main Card -->
+    <main class="workspace">
+        <div class="workspace-header">
+            <div>
+                <h2 class="workspace-title">Swipe Card Logs</h2>
+                <p class="workspace-subtitle">Paste raw swipe records below (tab or space separated)</p>
             </div>
         </div>
 
-        <div class="goal-progress-wrap">
-            <div class="goal-progress-head">
-                <span>Progress toward 8h goal</span>
-                <span id="goalProgressPct">0%</span>
+        <textarea id="logInput" class="log-textarea" placeholder="Paste attendance rows here...
+Format: Date [tab] Time [tab] In/Out [tab] IP [tab] Device / Location
+Example:
+01-Oct-26	10:29 AM	In	172.16.2.17	FIFTH FLOOR IN
+01-Oct-26	11:18 AM	Out	172.16.2.17	FIFTH FLOOR OUT
+01-Oct-26	11:24 AM	In	172.16.2.17	FIFTH FLOOR IN
+01-Oct-26	01:04 PM	Out	172.16.2.17	FIFTH FLOOR OUT
+01-Oct-26	01:37 PM	In	172.16.2.17	FIFTH FLOOR IN"></textarea>
+
+        <div class="action-toolbar">
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="analyzeLogs()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Calculate
+                </button>
+                <button class="btn btn-outline" onclick="copyStandupSummary()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Copy Summary
+                </button>
+                <button id="missedPunchToolbarBtn" class="btn-warn-badge" onclick="openMissedPunchModal()" style="display:none;" title="Click to view missed punch details">
+                    <span class="status-dot" style="background:var(--warning);"></span>
+                    <span id="missedPunchCountLabel">0 Missed Punches</span>
+                </button>
             </div>
-            <div class="progress-track">
-                <div id="goalProgressFill" class="progress-fill"></div>
+            <div class="btn-row">
+                <button class="btn btn-subtle" onclick="clearAll()">
+                    Clear
+                </button>
             </div>
+        </div>
+
+        <!-- 3 Shift Targets: 4h Half Day, 6h Short Leave, 8h Full Day -->
+        <div class="targets-section">
+            <div class="targets-title-wrap">
+                <span class="targets-title">Shift Targets &amp; Remaining Time Countdown</span>
+                <span style="font-size:11px; color:var(--text-muted);">Click card to select hero countdown target</span>
+            </div>
+
+            <div class="targets-grid">
+                <!-- Half Day (4 Hours) -->
+                <div id="targetCard4" class="target-card" onclick="selectActiveTarget(4.0)">
+                    <div class="target-card-header">
+                        <span class="target-card-label">Half Day</span>
+                        <span class="target-card-hours">4.0h Target</span>
+                    </div>
+                    <div class="target-countdown-subhead">Remaining Time Count</div>
+                    <div id="remainCount4" class="target-countdown-val">--:--:--</div>
+                    <div class="target-meta-row">
+                        <span id="leaveTime4">Departure: --:--</span>
+                        <span id="pct4">0%</span>
+                    </div>
+                    <div class="target-progress-bar">
+                        <div id="fill4" class="target-progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Short Leave (6 Hours) -->
+                <div id="targetCard6" class="target-card" onclick="selectActiveTarget(6.0)">
+                    <div class="target-card-header">
+                        <span class="target-card-label">Short Leave</span>
+                        <span class="target-card-hours">6.0h Target</span>
+                    </div>
+                    <div class="target-countdown-subhead">Remaining Time Count</div>
+                    <div id="remainCount6" class="target-countdown-val">--:--:--</div>
+                    <div class="target-meta-row">
+                        <span id="leaveTime6">Departure: --:--</span>
+                        <span id="pct6">0%</span>
+                    </div>
+                    <div class="target-progress-bar">
+                        <div id="fill6" class="target-progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Full Day (8 Hours) -->
+                <div id="targetCard8" class="target-card selected" onclick="selectActiveTarget(8.0)">
+                    <div class="target-card-header">
+                        <span class="target-card-label">Full Day</span>
+                        <span class="target-card-hours">8.0h Target</span>
+                    </div>
+                    <div class="target-countdown-subhead">Remaining Time Count</div>
+                    <div id="remainCount8" class="target-countdown-val">--:--:--</div>
+                    <div class="target-meta-row">
+                        <span id="leaveTime8">Departure: --:--</span>
+                        <span id="pct8">0%</span>
+                    </div>
+                    <div class="target-progress-bar">
+                        <div id="fill8" class="target-progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Core Summary Metrics Grid -->
+        <div class="metrics-grid">
+            <div class="metric-box">
+                <div class="metric-title">Total Office Time</div>
+                <div id="metricOfficeTime" class="metric-data">0h 0m</div>
+                <div id="metricOfficeSpan" class="metric-desc">First In to Last Out</div>
+            </div>
+
+            <div class="metric-box">
+                <div class="metric-title">Net Working Time</div>
+                <div id="metricWorkingTime" class="metric-data">0h 0m</div>
+                <div id="metricWorkPct" class="metric-desc">Desk productivity</div>
+            </div>
+
+            <div class="metric-box">
+                <div class="metric-title">Total Break Time</div>
+                <div id="metricBreakTime" class="metric-data">0h 0m</div>
+                <div id="metricBreakCount" class="metric-desc">Pantry & floor transit</div>
+            </div>
+
+            <div class="metric-box active-countdown">
+                <div id="metricActiveTargetTitle" class="metric-title">Full Day (8h) Remaining Count</div>
+                <div id="metricRemainingTime" class="metric-data">--:--:--</div>
+                <div id="metricTargetStatusDesc" class="metric-desc">Target countdown</div>
+            </div>
+        </div>
+
+        <!-- Shift Timeline Bar -->
+        <div id="timelineSection" class="timeline-container" style="display: none;">
+            <div class="timeline-header">
+                <h3>Visual Shift Timeline</h3>
+                <div class="timeline-legend">
+                    <span class="legend-tag"><span class="legend-indicator indicator-work"></span> Working</span>
+                    <span class="legend-tag"><span class="legend-indicator indicator-break"></span> Break</span>
+                    <span class="legend-tag"><span class="legend-indicator indicator-live"></span> Live In</span>
+                </div>
+            </div>
+            <div id="timelineTrack" class="timeline-track"></div>
+            <div class="timeline-timestamps">
+                <span id="timelineStart">--:--</span>
+                <span id="timelineEnd">--:--</span>
+            </div>
+        </div>
+
+        <!-- Detailed Punch Breakdown Table -->
+        <div id="logTableSection" class="log-table-container" style="display: none;">
+            <div class="log-table-header">
+                <h3>Detailed Punch & Session Log</h3>
+                <span id="tableLogDate" style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted);"></span>
+            </div>
+            <div class="log-table-wrapper">
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 45px;">#</th>
+                            <th style="width: 80px;">Swipe</th>
+                            <th>Time</th>
+                            <th>Location / Device</th>
+                            <th>Interval Type</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Toast Notice -->
+<div id="toast" class="toast"></div>
+
+<!-- Missed Punch Modal Popup -->
+<div id="missedPunchModal" class="modal-overlay" onclick="closeMissedPunchModalOnBackdrop(event)">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-header">
+            <div class="modal-header-title">
+                <span id="modalTitle">Attendance Anomaly Alert</span>
+                <span id="modalAnomalyBadge" class="modal-badge-warn">0 Missed Punches</span>
+            </div>
+            <button class="modal-close-btn" onclick="closeMissedPunchModal()" title="Close popup" aria-label="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="modalSummaryText" style="font-size:12px; color:var(--text-secondary); margin-bottom:14px; line-height:1.5;">
+                The following swipe sequence anomalies were detected in your records. Exact timestamps and swipe details are listed below:
+            </div>
+            <div id="missedPunchList">
+                <!-- Dynamically populated list of missed punches with exact times -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeMissedPunchModal()">Acknowledge</button>
         </div>
     </div>
 </div>
 
 <script>
-function updateClock() {
-    const now = new Date();
-    document.getElementById('liveClock').innerText = `System Time: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-function parseTimeToMinutes(timeStr) {
-    const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
-    if (!match) return null;
-    let hours = parseInt(match[1]);
-    const minutes = parseInt(match[2]);
-    const ampm = match[3].toUpperCase();
-
-    if (ampm === 'PM' && hours < 12) hours += 12;
-    if (ampm === 'AM' && hours === 12) hours = 0;
-
-    return hours * 60 + minutes;
-}
-
-function formatMinutesToHoursAndMins(totalMinutes) {
-    if(totalMinutes < 0) totalMinutes = 0;
-    const hrs = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
-    return `${hrs}h ${mins}m`;
-}
-
-function formatDate(date) {
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return `${String(date.getDate()).padStart(2, '0')}-${months[date.getMonth()]}-${String(date.getFullYear()).slice(-2)}`;
-}
-
-function formatClockTime(totalMinutesSinceMidnight) {
-    const mins = ((totalMinutesSinceMidnight % 1440) + 1440) % 1440;
-    const hrs24 = Math.floor(mins / 60);
-    const mm = mins % 60;
-    const ampm = hrs24 >= 12 ? 'PM' : 'AM';
-    let hrs12 = hrs24 % 12;
-    if (hrs12 === 0) hrs12 = 12;
-    return `${hrs12}:${String(mm).padStart(2, '0')} ${ampm}`;
-}
-
-let lastParsedLogs = null;
+// --- Global State ---
+let parsedPunches = [];
+let detectedAnomalies = [];
+let activeTargetHours = 8.0;
 let lastLogDateStr = "";
-let liveRemainingSeconds = null;
-let countdownActive = false;
+let liveTickerId = null;
 
-function analyzeLogs() {
-    const rawData = document.getElementById('logInput').value.trim();
-    if (!rawData) {
-        alert("Please paste some log data first.");
-        return;
+// --- System Clock ---
+function startClock() {
+    function tick() {
+        const now = new Date();
+        const str = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const clockEl = document.getElementById('systemClockVal');
+        if (clockEl) clockEl.innerText = str;
     }
+    tick();
+    setInterval(tick, 1000);
+}
 
-    const lines = rawData.split('\n');
-    let logs = [];
-    let logDateStr = "";
+// --- Theme Toggle ---
+function initTheme() {
+    const saved = localStorage.getItem('wt_clean_theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+    } else {
+        document.body.classList.remove('light-theme');
+    }
+}
 
-    // Robust Regex matching spacing patterns across all device names
-    const logRegex = /^(\d{2}-[A-Za-z]{3}-\d{2})\s*(\d{2}:\d{2}\s*(?:AM|PM))\s*(In|Out)/i;
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('wt_clean_theme', isLight ? 'light' : 'dark');
+}
 
-    lines.forEach(line => {
-        const cleanedLine = line.trim();
-        if (!cleanedLine || cleanedLine.toLowerCase().includes('dateentry')) return;
+// --- Time Parsing & Formatting ---
+function parseTimeToMinutes(timeStr) {
+    if (!timeStr) return null;
+    const match = timeStr.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);
+    if (!match) return null;
 
-        const match = cleanedLine.match(logRegex);
-        if (match) {
-            logDateStr = match[1];
-            const timeStr = match[2];
-            const inOut = match[3].toLowerCase();
+    let h = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10);
+    const ampm = match[3] ? match[3].toUpperCase() : null;
+
+    if (ampm === 'PM' && h < 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+
+    return (h * 60) + m;
+}
+
+function formatMinutes(mins) {
+    if (isNaN(mins) || mins < 0) mins = 0;
+    const h = Math.floor(mins / 60);
+    const m = Math.floor(mins % 60);
+    return `${h}h ${m}m`;
+}
+
+function formatClock(totalMinutes) {
+    if (isNaN(totalMinutes)) return '--:--';
+    const normalized = ((Math.round(totalMinutes) % 1440) + 1440) % 1440;
+    const h24 = Math.floor(normalized / 60);
+    const m = normalized % 60;
+    const ampm = h24 >= 12 ? 'PM' : 'AM';
+    let h12 = h24 % 12;
+    if (h12 === 0) h12 = 12;
+    return `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+// Format Seconds into precise HH:MM:SS Countdown
+function formatHMS(totalSecs) {
+    if (isNaN(totalSecs) || totalSecs < 0) totalSecs = 0;
+    const h = Math.floor(totalSecs / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = Math.floor(totalSecs % 60);
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function getTodayFormatted() {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mmm = months[d.getMonth()];
+    const yy = String(d.getFullYear()).slice(-2);
+    return `${dd}-${mmm}-${yy}`;
+}
+
+function isLogDateToday(dateStr) {
+    if (!dateStr) return true;
+    const now = new Date();
+    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    const d = now.getDate();
+    const mmm = months[now.getMonth()];
+    const s = dateStr.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const dayMatches = s.includes(String(d).padStart(2, '0')) || s.includes(String(d));
+    const monthMatches = s.includes(mmm);
+    return dayMatches && monthMatches;
+}
+
+// --- Log Parser ---
+function parseSingleLine(line) {
+    const trimmed = line.trim();
+    if (!trimmed) return null;
+
+    if (trimmed.includes('\t')) {
+        const parts = trimmed.split('\t').map(s => s.trim()).filter(Boolean);
+        let dateStr = "";
+        let timeStr = "";
+        let inOut = "";
+        let location = "";
+
+        for (let i = 0; i < parts.length; i++) {
+            const p = parts[i];
+            if (!dateStr && /^(\d{2}-[A-Za-z]{3}-\d{2,4}|\d{4}-\d{2}-\d{2})$/i.test(p)) {
+                dateStr = p;
+                continue;
+            }
+            if (!timeStr && /^(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)$/i.test(p)) {
+                timeStr = p;
+                continue;
+            }
+            if (!inOut && /^(in|out)$/i.test(p)) {
+                inOut = p.toLowerCase();
+                continue;
+            }
+            if (!location && !/^(\d{1,3}\.){3}\d{1,3}$/.test(p) && !/^(\d{2}-[A-Za-z]{3}-\d{2,4})/i.test(p)) {
+                location = p;
+            }
+        }
+
+        if (timeStr && inOut) {
             const minutes = parseTimeToMinutes(timeStr);
             if (minutes !== null) {
-                logs.push({ minutes, inOut });
+                return { dateStr, timeStr, inOut, location, minutes };
+            }
+        }
+    }
+
+    const match = trimmed.match(/(?:(\d{2}-[A-Za-z]{3}-\d{2,4}|\d{4}-\d{2}-\d{2})\s+)?(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\s+(In|Out)(?:\s+(?:(?:\d{1,3}\.){3}\d{1,3}\s+)?([^\t\r\n]+))?/i);
+    if (match) {
+        const dateStr = match[1] || "";
+        const timeStr = match[2];
+        const inOut = match[3].toLowerCase();
+        const location = match[4] ? match[4].trim() : "";
+        const minutes = parseTimeToMinutes(timeStr);
+        if (minutes !== null) {
+            return { dateStr, timeStr, inOut, location, minutes };
+        }
+    }
+
+    return null;
+}
+
+// --- Missed Punch Detection ---
+function detectMissedPunches(punches) {
+    const anomalies = [];
+    if (!punches || punches.length === 0) return anomalies;
+
+    // Check first swipe of the day
+    if (punches[0].inOut === 'out') {
+        anomalies.push({
+            punchIndex: 0,
+            type: 'FIRST_OUT',
+            title: 'Missing First IN Punch',
+            time: punches[0].timeStr,
+            minutes: punches[0].minutes,
+            location: punches[0].location || 'Turnstile / Device',
+            description: `First swipe of the day is an OUT at ${punches[0].timeStr}. The preceding morning check-in (IN) punch is missing.`
+        });
+    }
+
+    // Check consecutive punch pairs
+    for (let i = 1; i < punches.length; i++) {
+        const prev = punches[i - 1];
+        const curr = punches[i];
+
+        if (prev.inOut === 'in' && curr.inOut === 'in') {
+            const timeDiff = curr.minutes - prev.minutes;
+            let timeMsg = timeDiff === 0 ? `at ${curr.timeStr}` : `between ${prev.timeStr} and ${curr.timeStr}`;
+            anomalies.push({
+                punchIndex: i,
+                type: 'MISSING_OUT',
+                title: 'Missing OUT Punch / Consecutive IN',
+                time: curr.timeStr,
+                prevTime: prev.timeStr,
+                minutes: curr.minutes,
+                location: curr.location || 'Turnstile / Device',
+                description: `Missing OUT swipe ${timeMsg}. Recorded IN at ${prev.timeStr}, but swiped IN again at ${curr.timeStr} without an OUT swipe.`
+            });
+        } else if (prev.inOut === 'out' && curr.inOut === 'out') {
+            const timeDiff = curr.minutes - prev.minutes;
+            let timeMsg = timeDiff === 0 ? `at ${curr.timeStr}` : `between ${prev.timeStr} and ${curr.timeStr}`;
+            anomalies.push({
+                punchIndex: i,
+                type: 'MISSING_IN',
+                title: 'Missing IN Punch / Consecutive OUT',
+                time: curr.timeStr,
+                prevTime: prev.timeStr,
+                minutes: curr.minutes,
+                location: curr.location || 'Turnstile / Device',
+                description: `Missing IN swipe ${timeMsg}. Recorded OUT at ${prev.timeStr}, but swiped OUT again at ${curr.timeStr} without an IN swipe.`
+            });
+        }
+    }
+
+    return anomalies;
+}
+
+// --- Missed Punch Modal & UI Updaters ---
+function updateMissedPunchUI(anomalies, autoOpen = false) {
+    const badge = document.getElementById('missedPunchToolbarBtn');
+    const badgeLabel = document.getElementById('missedPunchCountLabel');
+    const modalBadge = document.getElementById('modalAnomalyBadge');
+    const listContainer = document.getElementById('missedPunchList');
+
+    if (!anomalies || anomalies.length === 0) {
+        if (badge) badge.style.display = 'none';
+        closeMissedPunchModal();
+        return;
+    }
+
+    const count = anomalies.length;
+    const labelText = `${count} Missed Punch${count > 1 ? 'es' : ''}`;
+
+    if (badge) {
+        badge.style.display = 'inline-flex';
+        if (badgeLabel) badgeLabel.innerText = labelText;
+    }
+
+    if (modalBadge) {
+        modalBadge.innerText = labelText;
+    }
+
+    if (listContainer) {
+        listContainer.innerHTML = '';
+        anomalies.forEach((a, idx) => {
+            const card = document.createElement('div');
+            card.className = 'anomaly-item';
+            card.innerHTML = `
+                <div class="anomaly-header">
+                    <span class="anomaly-type">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        ${a.title} (#${idx + 1})
+                    </span>
+                    <span class="anomaly-time">${a.time}</span>
+                </div>
+                <div class="anomaly-desc">${a.description}</div>
+                <div class="anomaly-location">Device / Location: ${a.location}</div>
+            `;
+            listContainer.appendChild(card);
+        });
+    }
+
+    if (autoOpen) {
+        openMissedPunchModal();
+    }
+}
+
+function openMissedPunchModal() {
+    const modal = document.getElementById('missedPunchModal');
+    if (modal) {
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+    }
+}
+
+function closeMissedPunchModal() {
+    const modal = document.getElementById('missedPunchModal');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+    }
+}
+
+function closeMissedPunchModalOnBackdrop(e) {
+    if (e.target && e.target.id === 'missedPunchModal') {
+        closeMissedPunchModal();
+    }
+}
+
+// --- Target Selector ---
+function selectActiveTarget(targetHours) {
+    activeTargetHours = targetHours;
+    [4.0, 6.0, 8.0].forEach(h => {
+        const el = document.getElementById(`targetCard${Math.floor(h)}`);
+        if (el) el.classList.toggle('selected', h === targetHours);
+    });
+
+    const targetNames = { 4.0: 'Half Day (4h)', 6.0: 'Short Leave (6h)', 8.0: 'Full Day (8h)' };
+    const titleEl = document.getElementById('metricActiveTargetTitle');
+    if (titleEl) titleEl.innerText = `${targetNames[targetHours]} Remaining Count`;
+
+    if (parsedPunches.length > 0) {
+        calculateAndRender(false);
+    }
+}
+
+// --- Main Analyzer ---
+function analyzeLogs() {
+    const raw = document.getElementById('logInput').value.trim();
+    if (!raw) {
+        showToast("Please paste log data into the box.");
+        return;
+    }
+
+    localStorage.setItem('wt_clean_saved_logs', raw);
+    const lines = raw.split(/\r?\n/);
+    const entries = [];
+    let detectedDate = "";
+
+    lines.forEach(l => {
+        const parsed = parseSingleLine(l);
+        if (parsed) {
+            if (parsed.dateStr && !detectedDate) detectedDate = parsed.dateStr;
+            entries.push(parsed);
+        }
+    });
+
+    if (entries.length === 0) {
+        showToast("No valid attendance In/Out rows found.");
+        return;
+    }
+
+    // Stable sort preserving original input order when timestamps match
+    entries.forEach((e, idx) => e._origIdx = idx);
+    entries.sort((a, b) => (a.minutes - b.minutes) || (a._origIdx - b._origIdx));
+
+    // Keep all swipe records without silently dropping duplicates
+    parsedPunches = entries;
+    lastLogDateStr = detectedDate || getTodayFormatted();
+
+    // Detect missed punches (consecutive INs, consecutive OUTs, starting with OUT)
+    detectedAnomalies = detectMissedPunches(parsedPunches);
+    updateMissedPunchUI(detectedAnomalies, detectedAnomalies.length > 0);
+
+    calculateAndRender(true);
+    startLiveTicker();
+
+    if (detectedAnomalies.length > 0) {
+        showToast(`Processed ${parsedPunches.length} records • ${detectedAnomalies.length} Missed Punch detected!`);
+    } else {
+        showToast(`Processed ${parsedPunches.length} swipe records.`);
+    }
+}
+
+// --- Compute Attendance & Live Second-by-Second Countdown ---
+function calculateAndRender(fullRender = true) {
+    if (!parsedPunches || parsedPunches.length === 0) return;
+
+    const isToday = isLogDateToday(lastLogDateStr);
+    const firstInMinutes = parsedPunches[0].minutes;
+    const lastRecordedMinutes = parsedPunches[parsedPunches.length - 1].minutes;
+
+    const now = new Date();
+    const currentSecondsSinceMidnight = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
+    const lastPunch = parsedPunches[parsedPunches.length - 1];
+
+    let isLiveIn = false;
+    let isLiveBreak = false;
+    let effectiveLastMinutes = lastRecordedMinutes;
+
+    const isLastPunchIn = lastPunch.inOut === 'in';
+    const isAfterLastPunch = currentSecondsSinceMidnight >= (lastPunch.minutes * 60);
+
+    if (isLastPunchIn && isAfterLastPunch) {
+        effectiveLastMinutes = currentSecondsSinceMidnight / 60;
+        isLiveIn = true;
+    } else if (!isLastPunchIn && isToday && isAfterLastPunch) {
+        effectiveLastMinutes = currentSecondsSinceMidnight / 60;
+        isLiveBreak = true;
+    }
+
+    // Parse Closed Work and Break Intervals (handles missed punches cleanly)
+    let closedWorkMinutes = 0;
+    let currentIn = null;
+    let sessions = [];
+    let breaks = [];
+
+    parsedPunches.forEach((p) => {
+        if (p.inOut === 'in') {
+            if (currentIn === null) {
+                currentIn = p.minutes;
+                if (sessions.length > 0) {
+                    const prevOut = sessions[sessions.length - 1].end;
+                    const breakDur = p.minutes - prevOut;
+                    if (breakDur > 0) {
+                        breaks.push({
+                            type: 'break',
+                            start: prevOut,
+                            end: p.minutes,
+                            duration: breakDur,
+                            location: p.location || 'Break / Transit'
+                        });
+                    }
+                }
+            } else {
+                // Consecutive IN (missed OUT) - close previous session and start new
+                const workDur = Math.max(0, p.minutes - currentIn);
+                closedWorkMinutes += workDur;
+                sessions.push({
+                    type: 'work',
+                    start: currentIn,
+                    end: p.minutes,
+                    duration: workDur,
+                    location: (p.location || 'Desk') + ' (Missed Out)'
+                });
+                currentIn = p.minutes;
+            }
+        } else if (p.inOut === 'out') {
+            if (currentIn !== null) {
+                const workDur = p.minutes - currentIn;
+                closedWorkMinutes += workDur;
+                sessions.push({
+                    type: 'work',
+                    start: currentIn,
+                    end: p.minutes,
+                    duration: workDur,
+                    location: p.location || 'Desk'
+                });
+                currentIn = null;
             }
         }
     });
 
-    if (logs.length === 0) {
-        alert("No valid log data detected.");
-        return;
+    // Ongoing live session or active break
+    let liveSessionSeconds = 0;
+    let liveBreakSeconds = 0;
+
+    if (isLiveIn && currentIn !== null) {
+        liveSessionSeconds = Math.max(0, currentSecondsSinceMidnight - (currentIn * 60));
+        sessions.push({
+            type: 'live',
+            start: currentIn,
+            end: currentSecondsSinceMidnight / 60,
+            duration: liveSessionSeconds / 60,
+            location: lastPunch.location ? `${lastPunch.location} (Active)` : 'Active Work'
+        });
+    } else if (isLiveBreak) {
+        liveBreakSeconds = Math.max(0, currentSecondsSinceMidnight - (lastPunch.minutes * 60));
     }
 
-    logs.sort((a, b) => a.minutes - b.minutes);
-    lastParsedLogs = logs;
-    lastLogDateStr = logDateStr;
-    renderStats();
-}
+    // High Precision Seconds Totals
+    const totalNetWorkSeconds = (closedWorkMinutes * 60) + liveSessionSeconds;
+    const closedBreakMinutes = breaks.reduce((acc, b) => acc + b.duration, 0);
+    const totalBreakSeconds = (closedBreakMinutes * 60) + liveBreakSeconds;
+    const totalOfficeSeconds = Math.max(0, (effectiveLastMinutes * 60) - (firstInMinutes * 60));
 
-setInterval(() => {
-    if (lastParsedLogs) renderStats();
-}, 15000);
+    // Live status banner update
+    const liveBar = document.getElementById('liveStatusBar');
+    const liveTextEl = document.getElementById('liveStatusText');
+    const liveTimeEl = document.getElementById('liveSessionDuration');
 
-function renderStats() {
-    const logs = lastParsedLogs;
-    const logDateStr = lastLogDateStr;
-    if (!logs) return;
-
-    const todayStr = formatDate(new Date());
-    const isToday = (logDateStr.toLowerCase() === todayStr.toLowerCase());
-
-    const firstIn = logs[0].minutes;
-    let lastOut = logs[logs.length - 1].minutes;
-
-    let isLiveTracking = false;
-    if (isToday) {
-        const now = new Date();
-        const currentSystemMinutes = (now.getHours() * 60) + now.getMinutes();
-        if (currentSystemMinutes > lastOut) {
-            // Check if user is currently swiped IN
-            if (logs[logs.length - 1].inOut === 'in') {
-                lastOut = currentSystemMinutes;
-                isLiveTracking = true;
-            }
+    if (liveBar && liveTextEl && liveTimeEl) {
+        if (isLiveIn) {
+            liveBar.classList.remove('break-mode');
+            liveBar.classList.add('active');
+            liveTextEl.innerText = "Live Shift Active — Currently Swiped IN";
+            liveTimeEl.innerText = `Session: ${formatHMS(liveSessionSeconds)}`;
+        } else if (isLiveBreak) {
+            liveBar.classList.add('active');
+            liveBar.classList.add('break-mode');
+            liveTextEl.innerText = "Currently Swiped OUT (Break / Transit)";
+            liveTimeEl.innerText = `Break: ${formatHMS(liveBreakSeconds)}`;
+        } else {
+            liveBar.classList.remove('active');
         }
     }
 
-    const totalOfficeMinutes = lastOut - firstIn;
+    // Core Summary Metrics
+    document.getElementById('metricOfficeTime').innerText = formatMinutes(Math.floor(totalOfficeSeconds / 60));
+    document.getElementById('metricOfficeSpan').innerText = `${formatClock(firstInMinutes)} to ${formatClock(effectiveLastMinutes)}${isToday ? ' (Live)' : ''}`;
 
-    // Strict calculation: sum periods where user is swiped Out between work blocks
-    let netWorkingMinutes = 0;
-    let currentInTime = null;
+    document.getElementById('metricWorkingTime').innerText = formatMinutes(Math.floor(totalNetWorkSeconds / 60));
+    const workEfficiency = totalOfficeSeconds > 0 ? Math.round((totalNetWorkSeconds / totalOfficeSeconds) * 100) : 0;
+    document.getElementById('metricWorkPct').innerText = `Live: ${formatHMS(totalNetWorkSeconds)} • ${workEfficiency}% productivity`;
 
-    logs.forEach(log => {
-        if (log.inOut === 'in') {
-            if (currentInTime === null) currentInTime = log.minutes;
-        } else if (log.inOut === 'out') {
-            if (currentInTime !== null) {
-                netWorkingMinutes += (log.minutes - currentInTime);
-                currentInTime = null;
+    document.getElementById('metricBreakTime').innerText = formatMinutes(Math.floor(totalBreakSeconds / 60));
+    document.getElementById('metricBreakCount').innerText = `${breaks.length} break session${breaks.length === 1 ? '' : 's'}${isLiveBreak ? ' (active break)' : ''}`;
+
+    // Target Calculation Function with Ticking Seconds Countdown
+    function updateTargetCard(targetH, elRemain, elLeave, elPct, elFill) {
+        const targetSeconds = targetH * 3600;
+        const remainingSeconds = targetSeconds - totalNetWorkSeconds;
+        const projectedLeaveMinutes = firstInMinutes + (targetH * 60) + Math.floor(totalBreakSeconds / 60);
+
+        const remainEl = document.getElementById(elRemain);
+        const leaveEl = document.getElementById(elLeave);
+        const pctEl = document.getElementById(elPct);
+        const fillEl = document.getElementById(elFill);
+
+        const pct = Math.max(0, Math.min(100, Math.round((totalNetWorkSeconds / targetSeconds) * 100)));
+        if (pctEl) pctEl.innerText = `${pct}%`;
+        if (fillEl) {
+            fillEl.style.width = `${pct}%`;
+            fillEl.classList.toggle('done', remainingSeconds <= 0);
+        }
+
+        if (leaveEl) {
+            leaveEl.innerText = `Departure: ${formatClock(projectedLeaveMinutes)}`;
+        }
+
+        if (remainEl) {
+            if (remainingSeconds <= 0) {
+                const overtimeSecs = Math.abs(remainingSeconds);
+                remainEl.innerHTML = overtimeSecs > 0
+                    ? `<span style="color:var(--success);">Done</span> <span style="font-size:13px; color:var(--text-secondary); font-weight:500;">(+${formatHMS(overtimeSecs)})</span>`
+                    : `<span style="color:var(--success);">Completed</span>`;
+            } else {
+                remainEl.innerText = formatHMS(remainingSeconds);
+                remainEl.style.color = 'var(--text-primary)';
             }
+        }
+
+        return { remainingSeconds, projectedLeaveMinutes, pct };
+    }
+
+    // Calculate all 3 targets: 4h (Half Day), 6h (Short Leave), 8h (Full Day)
+    const t4 = updateTargetCard(4.0, 'remainCount4', 'leaveTime4', 'pct4', 'fill4');
+    const t6 = updateTargetCard(6.0, 'remainCount6', 'leaveTime6', 'pct6', 'fill6');
+    const t8 = updateTargetCard(8.0, 'remainCount8', 'leaveTime8', 'pct8', 'fill8');
+
+    // Selected Target Active Metric Box (prominent countdown)
+    const activeResult = activeTargetHours === 4.0 ? t4 : activeTargetHours === 6.0 ? t6 : t8;
+    const remainingBox = document.getElementById('metricRemainingTime');
+    const statusDescBox = document.getElementById('metricTargetStatusDesc');
+    const liveTargetCountdown = document.getElementById('liveTargetCountdown');
+    const targetNames = { 4.0: 'Half Day (4h)', 6.0: 'Short Leave (6h)', 8.0: 'Full Day (8h)' };
+
+    if (activeResult.remainingSeconds <= 0) {
+        const ot = Math.abs(activeResult.remainingSeconds);
+        remainingBox.innerText = 'Goal Reached';
+        remainingBox.style.color = 'var(--success)';
+        statusDescBox.innerText = ot > 0 ? `Target met (+${formatHMS(ot)} overtime)` : 'Target completed';
+        if (liveTargetCountdown) {
+            liveTargetCountdown.innerText = `${targetNames[activeTargetHours]}: Done (+${formatHMS(ot)})`;
+        }
+    } else {
+        remainingBox.innerText = formatHMS(activeResult.remainingSeconds);
+        remainingBox.style.color = 'var(--text-primary)';
+        statusDescBox.innerText = `Departure: ${formatClock(activeResult.projectedLeaveMinutes)} (${activeResult.pct}% done)`;
+        if (liveTargetCountdown) {
+            liveTargetCountdown.innerText = `${targetNames[activeTargetHours]} Rem: ${formatHMS(activeResult.remainingSeconds)}`;
+        }
+    }
+
+    // Render Timeline & Table only on full render
+    if (fullRender) {
+        renderTimeline(firstInMinutes, effectiveLastMinutes, sessions, breaks);
+        renderTable(sessions, breaks);
+    }
+}
+
+// --- Live Ticker (Every 1000ms) ---
+function startLiveTicker() {
+    if (liveTickerId) clearInterval(liveTickerId);
+    liveTickerId = setInterval(() => {
+        if (parsedPunches && parsedPunches.length > 0) {
+            calculateAndRender(false);
+        }
+    }, 1000);
+}
+
+// --- Visual Timeline ---
+function renderTimeline(startM, endM, sessions, breaks) {
+    const container = document.getElementById('timelineSection');
+    const track = document.getElementById('timelineTrack');
+
+    if (!sessions || sessions.length === 0 || endM <= startM) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    track.innerHTML = '';
+
+    const totalSpan = endM - startM;
+    document.getElementById('timelineStart').innerText = formatClock(startM);
+    document.getElementById('timelineEnd').innerText = formatClock(endM);
+
+    const allBlocks = [...sessions, ...breaks].sort((a, b) => a.start - b.start);
+
+    allBlocks.forEach(b => {
+        const dur = b.end - b.start;
+        if (dur <= 0) return;
+
+        const widthPct = (dur / totalSpan) * 100;
+        const block = document.createElement('div');
+        block.className = `timeline-block ${b.type}`;
+        block.style.width = `${widthPct}%`;
+
+        const typeLabel = b.type === 'work' ? 'Work' : b.type === 'live' ? 'Live Work' : 'Break';
+        const tip = `${typeLabel}: ${formatClock(b.start)} - ${formatClock(b.end)} (${formatMinutes(dur)})`;
+        block.title = tip;
+        track.appendChild(block);
+    });
+}
+
+// --- Punch Breakdown Table ---
+function renderTable(sessions, breaks) {
+    const container = document.getElementById('logTableSection');
+    const tbody = document.getElementById('tableBody');
+
+    if (!parsedPunches || parsedPunches.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    tbody.innerHTML = '';
+    document.getElementById('tableLogDate').innerText = `Date: ${lastLogDateStr}`;
+
+    parsedPunches.forEach((p, i) => {
+        const tr = document.createElement('tr');
+        const badgeClass = p.inOut === 'in' ? 'badge-in' : 'badge-out';
+        const typeText = p.inOut.toUpperCase();
+
+        // Check if this punch had an anomaly
+        const matchedAnomaly = detectedAnomalies.find(a => a.punchIndex === i || (a.minutes === p.minutes && a.time === p.timeStr));
+        let anomalyBadgeHtml = '';
+        if (matchedAnomaly) {
+            anomalyBadgeHtml = `<span class="badge-anomaly" title="${matchedAnomaly.description}">Missed Punch</span>`;
+        }
+
+        // Match session or break duration
+        let intervalDesc = 'Swipe Event';
+        let intervalDur = '--';
+
+        if (p.inOut === 'out') {
+            const matchedSession = sessions.find(s => Math.abs(s.end - p.minutes) <= 1);
+            if (matchedSession) {
+                intervalDesc = 'Work Session';
+                intervalDur = formatMinutes(matchedSession.duration);
+            }
+        } else if (p.inOut === 'in' && i > 0) {
+            const matchedBreak = breaks.find(b => Math.abs(b.end - p.minutes) <= 1);
+            if (matchedBreak) {
+                intervalDesc = 'Break / Transit';
+                intervalDur = formatMinutes(matchedBreak.duration);
+            }
+        }
+
+        tr.innerHTML = `
+            <td style="font-family:var(--font-mono); color:var(--text-muted);">${i + 1}</td>
+            <td><span class="badge ${badgeClass}">${typeText}</span>${anomalyBadgeHtml}</td>
+            <td style="font-family:var(--font-mono); font-weight:600;">${formatClock(p.minutes)}</td>
+            <td>${p.location || 'Turnstile / Door'}</td>
+            <td>${intervalDesc}</td>
+            <td style="font-family:var(--font-mono); font-weight:600;">${intervalDur}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// --- Copy Standup Summary ---
+function copyStandupSummary() {
+    if (!parsedPunches || parsedPunches.length === 0) {
+        showToast("Please calculate attendance first.");
+        return;
+    }
+
+    const office = document.getElementById('metricOfficeTime').innerText;
+    const work = document.getElementById('metricWorkingTime').innerText;
+    const breaks = document.getElementById('metricBreakTime').innerText;
+    const rem4 = document.getElementById('remainCount4') ? document.getElementById('remainCount4').innerText.trim() : '--';
+    const leave4 = document.getElementById('leaveTime4') ? document.getElementById('leaveTime4').innerText.trim() : '--';
+    const rem6 = document.getElementById('remainCount6') ? document.getElementById('remainCount6').innerText.trim() : '--';
+    const leave6 = document.getElementById('leaveTime6') ? document.getElementById('leaveTime6').innerText.trim() : '--';
+    const rem8 = document.getElementById('remainCount8') ? document.getElementById('remainCount8').innerText.trim() : '--';
+    const leave8 = document.getElementById('leaveTime8') ? document.getElementById('leaveTime8').innerText.trim() : '--';
+    const activeRemaining = document.getElementById('metricRemainingTime').innerText;
+
+    const targetNames = { 4.0: 'Half Day (4h)', 6.0: 'Short Leave (6h)', 8.0: 'Full Day (8h)' };
+
+    let summary =
+`Attendance Summary - ${lastLogDateStr}
+Total Office Time: ${office}
+Net Working Time: ${work}
+Total Break Time: ${breaks}
+
+Shift Targets & Remaining Time Counts:
+- Half Day (4h): Remaining ${rem4} (${leave4})
+- Short Leave (6h): Remaining ${rem6} (${leave6})
+- Full Day (8h): Remaining ${rem8} (${leave8})
+
+Active Target [${targetNames[activeTargetHours]}]: ${activeRemaining} remaining`;
+
+    if (detectedAnomalies && detectedAnomalies.length > 0) {
+        summary += `\n\nMissed Punches (${detectedAnomalies.length}):\n`;
+        detectedAnomalies.forEach((a, idx) => {
+            summary += `- #${idx + 1} at ${a.time}: ${a.title} (${a.location})\n`;
+        });
+    }
+
+    navigator.clipboard.writeText(summary).then(() => {
+        showToast("Summary copied to clipboard.");
+    }).catch(() => {
+        showToast("Copied summary text.");
+    });
+}
+
+// --- Clear Function ---
+function clearAll() {
+    document.getElementById('logInput').value = '';
+    localStorage.removeItem('wt_clean_saved_logs');
+    parsedPunches = [];
+    detectedAnomalies = [];
+    if (liveTickerId) clearInterval(liveTickerId);
+
+    document.getElementById('metricOfficeTime').innerText = '0h 0m';
+    document.getElementById('metricOfficeSpan').innerText = 'First In to Last Out';
+    document.getElementById('metricWorkingTime').innerText = '0h 0m';
+    document.getElementById('metricWorkPct').innerText = 'Desk productivity';
+    document.getElementById('metricBreakTime').innerText = '0h 0m';
+    document.getElementById('metricBreakCount').innerText = 'Pantry & floor transit';
+    document.getElementById('metricRemainingTime').innerText = '--:--:--';
+    document.getElementById('metricTargetStatusDesc').innerText = 'Target countdown';
+
+    ['remainCount4', 'remainCount6', 'remainCount8'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = '--:--:--';
+    });
+    ['leaveTime4', 'leaveTime6', 'leaveTime8'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = 'Departure: --:--';
+    });
+    ['pct4', 'pct6', 'pct8'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = '0%';
+    });
+    ['fill4', 'fill6', 'fill8'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.width = '0%';
+            el.classList.remove('done');
         }
     });
 
-    // Handle ongoing live calculation if last punch was an IN punch
-    if (currentInTime !== null && isToday) {
-        const now = new Date();
-        const currentSystemMinutes = (now.getHours() * 60) + now.getMinutes();
-        if (currentSystemMinutes > currentInTime) {
-            netWorkingMinutes += (currentSystemMinutes - currentInTime);
-        }
-    }
+    const badge = document.getElementById('missedPunchToolbarBtn');
+    if (badge) badge.style.display = 'none';
 
-    // Break time is total time spent away between shifts
-    const breakMinutes = totalOfficeMinutes - netWorkingMinutes;
-    const goalMinutes = 8 * 60;
-    const remainingMinutes = goalMinutes - netWorkingMinutes;
+    document.getElementById('timelineSection').style.display = 'none';
+    document.getElementById('logTableSection').style.display = 'none';
+    document.getElementById('liveStatusBar').classList.remove('active');
+    closeMissedPunchModal();
 
-    document.getElementById('totalOffice').innerText = formatMinutesToHoursAndMins(totalOfficeMinutes);
-    document.getElementById('totalPantry').innerText = formatMinutesToHoursAndMins(breakMinutes);
-    document.getElementById('netWork').innerText = formatMinutesToHoursAndMins(netWorkingMinutes);
-
-    const goalStatusDiv = document.getElementById('goalStatus');
-    const badgeContainer = document.getElementById('statusBadgeContainer');
-
-    if (remainingMinutes <= 0) {
-        countdownActive = false;
-        goalStatusDiv.innerText = "Completed!";
-        badgeContainer.innerHTML = `<span class="status-badge status-complete">8 Hours Achieved! 🎉</span>`;
-    } else if (isLiveTracking) {
-        countdownActive = true;
-        liveRemainingSeconds = remainingMinutes * 60;
-        badgeContainer.innerHTML = `<span class="status-badge status-live">Counting down...</span>`;
-        updateCountdown(false);
-    } else {
-        countdownActive = false;
-        goalStatusDiv.innerText = `${formatMinutesToHoursAndMins(remainingMinutes)} left`;
-        badgeContainer.innerHTML = `<span class="status-badge status-pending">Pending</span>`;
-    }
-
-    const progressPct = Math.max(0, Math.min(100, Math.round((netWorkingMinutes / goalMinutes) * 100)));
-    const progressFill = document.getElementById('goalProgressFill');
-    progressFill.style.width = `${progressPct}%`;
-    progressFill.classList.toggle('complete', progressPct >= 100);
-    document.getElementById('goalProgressPct').innerText = `${progressPct}%`;
-
-    const completionClockMinutes = firstIn + goalMinutes + breakMinutes;
-    const completionTimeEl = document.getElementById('completionTime');
-    const completionContextEl = document.getElementById('completionContext');
-
-    completionTimeEl.innerText = formatClockTime(completionClockMinutes);
-
-    if (remainingMinutes <= 0) {
-        completionContextEl.innerText = "Goal reached at this time";
-    } else if (isLiveTracking) {
-        completionContextEl.innerText = "Estimate — updates live, assumes no more breaks";
-    } else {
-        completionContextEl.innerText = "Based on pasted log (not live)";
-    }
+    showToast("Cleared.");
 }
 
-function updateCountdown(tick = true) {
-    if (!countdownActive || liveRemainingSeconds === null) return;
-
-    if (tick) liveRemainingSeconds -= 1;
-
-    if (liveRemainingSeconds <= 0) {
-        liveRemainingSeconds = 0;
-        countdownActive = false;
-        document.getElementById('goalStatus').innerText = "Completed!";
-        document.getElementById('statusBadgeContainer').innerHTML = `<span class="status-badge status-complete">8 Hours Achieved! 🎉</span>`;
-        return;
-    }
-
-    const hh = Math.floor(liveRemainingSeconds / 3600);
-    const mm = Math.floor((liveRemainingSeconds % 3600) / 60);
-    const ss = liveRemainingSeconds % 60;
-    document.getElementById('goalStatus').innerText =
-        `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+// --- Toast Notice ---
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.classList.add('visible');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => {
+        toast.classList.remove('visible');
+    }, 2400);
 }
-setInterval(updateCountdown, 1000);
+
+// --- Initialization ---
+window.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    startClock();
+
+    const saved = localStorage.getItem('wt_clean_saved_logs');
+    if (saved) {
+        document.getElementById('logInput').value = saved;
+        analyzeLogs();
+    }
+});
 </script>
+
 </body>
 </html>
